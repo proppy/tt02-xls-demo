@@ -10,9 +10,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: checkout repo
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
     - name: cache conda
-      uses: actions/cache@v2
+      uses: actions/cache@v3
       env:
         CACHE_NUMBER: 1
       with:
@@ -52,7 +52,7 @@ jobs:
         \`\`\`
         EOF
     - name: populate rtl cache
-      uses: actions/cache@v2
+      uses: actions/cache@v3
       with:
         path: src
         key: ${{ runner.os }}-rtl-${{ hashFiles('src/user_module.v') }}
@@ -213,12 +213,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: checkout repo
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
+
     - name: restore rtl cache
-      uses: actions/cache@v2
+      uses: actions/cache@v3
       with:
         path: src
         key: ${{ runner.os }}-rtl-${{ hashFiles('src/user_module.v') }}
+
     - name: commit generated rtl
        run: |
          git config --local user.name "tinybot"
