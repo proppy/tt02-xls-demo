@@ -222,12 +222,12 @@ jobs:
         key: ${{ runner.os }}-rtl-${{ hashFiles('src/user_module.v') }}
 
     - name: commit generated rtl
-       run: |
-         git config --local user.name "tinybot"
-         git config --local user.email "bot@tinytapeout.com"
-         git add src/user_module.v src/user_module.ir src/user_module_opt.ir
-         git commit -m "src: generated user module [skip ci]" || true
-         git push origin main
+      run: |
+        git config --local user.name "tinybot"
+        git config --local user.email "bot@tinytapeout.com"
+        git add src/user_module.v src/user_module.ir src/user_module_opt.ir
+        git commit -m "src: generated user module [skip ci]" || true
+        git push origin main
     
   artifact:
     needs:
