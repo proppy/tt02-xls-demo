@@ -1,27 +1,58 @@
 ![](../../workflows/gds/badge.svg) ![](../../workflows/docs/badge.svg)
 
-# What is Tiny Tapeout?
+# XLS template for TinyTapeout
 
-TinyTapeout is an educational project that aims to make it easier and cheaper than ever to get your digital designs manufactured on a real chip!
+Template for submitting [TinyTapeout](https://tinytapeout.com) designs based on [XLS: Accelerated HW Synthesis](https://github.com/google/xls) toolkit .
 
-Go to https://tinytapeout.com for instructions!
-
-## How to change the Wokwi project
-
-Edit the [info.yaml](info.yaml) and change the wokwi_id to match your project.
-
-## How to enable the GitHub actions to build the ASIC files
+## Pre-requisite
 
 Please see the instructions for:
 
 * [Enabling GitHub Actions](https://tinytapeout.com/faq/#when-i-commit-my-change-the-gds-action-isnt-running)
 * [Enabling GitHub Pages](https://tinytapeout.com/faq/#my-github-action-is-failing-on-the-pages-part)
 
-## How does it work?
+## Usage
 
-When you edit the info.yaml to choose a different ID, the [GitHub Action](.github/workflows/gds.yaml) will fetch the digital netlist of your design from Wokwi.
+1. [Generate](https://github.com/proppy/tinytapeout-xls-test/generate) a new project based on this template
 
-After that, the action uses the open source ASIC tool called [OpenLane](https://www.zerotoasiccourse.com/terminology/openlane/) to build the files needed to fabricate an ASIC.
+1. [Enable GitHub Actions](https://tinytapeout.com/faq/#when-i-commit-my-change-the-gds-action-isnt-running)
+
+1. [Enable GitHub Pages](https://tinytapeout.com/faq/#my-github-action-is-failing-on-the-pages-part)
+
+1. Modify [src/user_module.x](src/user_module.x) ([DSLX language reference](https://google.github.io/xls/dslx_reference/))
+
+	```
+	pub fn user_module(io_in: u8) -> u8 {
+	  io_in
+	}
+
+	#![test]
+	fn user_module_test() {
+	  let _= assert_eq(user_module(u8:0b0010_1010), u8:42);
+	  _
+	}
+	```
+
+1. Push and check the ![](../../workflows/gds/badge.svg)(https://github.com/proppy/tinytapeout-xls-test/actions/workflows/wokwi.yaml) action artefacts.
+
+    - `src/user_module.v`: generated verilog
+	
+		```
+		module user_module_USER_MODULE_ID(
+		  input wire [7:0] io_in,
+		  output wire [7:0] out
+		);
+		  assign out = io_in;
+		endmodule
+		```
+	
+	- `gds_render.svg`: GDS preview
+	
+        ![gds](images/noop.svg)
+
+1. Goto 3 until satisfied
+
+1. Submit the design to  [TinyTapeout](https://tinytapeout.com)
 
 ## Resources
 
