@@ -95,7 +95,7 @@ jobs:
 
     # restore generated rtl
     - name: restore rtl cache
-      uses: actions/cache@v2
+      uses: actions/cache@v3
       with:
         path: |
           src/user_module.x
