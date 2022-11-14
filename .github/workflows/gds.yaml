@@ -20,7 +20,7 @@ jobs:
         key:
           ${{ runner.os }}-${{ env.CACHE_NUMBER }}-conda-${{ hashFiles('environment.yml') }}
     - name: setup miniconda
-      uses: conda-incubator/setup-miniconda@v2.1.1
+      uses: conda-incubator/setup-miniconda@v2.2.0
       with:
         activate-environment: tinytapeout
         channel-priority: strict
