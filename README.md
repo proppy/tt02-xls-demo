@@ -48,7 +48,7 @@ Please see the instructions for:
 	
 	- `gds_render.svg`: GDS preview
 	
-        ![gds](images/noop.svg)
+        ![gds](gds_render.svg)
 
 1. Goto 3 until satisfied
 
