@@ -227,10 +227,10 @@ jobs:
       uses: actions/cache@v3
       with:
         path: |
-          user_module.x
-          user_module.ir
-          user_module_opt.ir
-          user_module.v
+          src/user_module.x
+          src/user_module.ir
+          src/user_module_opt.ir
+          src/user_module.v
         key: ${{ runner.os }}-${{ env.CACHE_NUMBER }}-rtl-${{ hashFiles('src/user_module.v') }}
 
     - name: commit generated rtl
