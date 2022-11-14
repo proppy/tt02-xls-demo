@@ -9,63 +9,57 @@ jobs:
   xls:
     runs-on: ubuntu-latest
     steps:
-      - name: checkout repo
-        uses: actions/checkout@v2
-      - name: cache conda
-        uses: actions/cache@v2
-        env:
-          CACHE_NUMBER: 1
-        with:
-          path: ~/conda_pkgs_dir
-          key:
-            ${{ runner.os }}-conda-${{ env.CACHE_NUMBER }}-${{ hashFiles('environment.yml') }}
-      - name: setup miniconda
-        uses: conda-incubator/setup-miniconda@v2.1.1
-        with:
-          activate-environment: tinytapeout
-          channel-priority: strict
-          environment-file: environment.yml
-          use-only-tar-bz2: true
-      - name: update path
-        shell: bash -l {0}
-        run: |
-          echo $CONDA/envs/tinytapeout/bin >> $GITHUB_PATH
-      - name: run dslx test
-        run: |
-          cat << EOF >> $GITHUB_STEP_SUMMARY
-          # test
-          \`\`\`
-          `interpreter_main src/user_module.x 2>&1`
-          \`\`\`
-          EOF
-      - name: generate rtl
-        run: |
-          ir_converter_main --top=user_module src/user_module.x > src/user_module.ir
-          opt_main src/user_module.ir > src/user_module_opt.ir
-          codegen_main --module_name user_module --use_system_verilog=false --generator=combinational src/user_module_opt.ir > src/user_module.v
-      - name: add verilog to summary
-        run: |
-          cat << EOF >> $GITHUB_STEP_SUMMARY
-          # codegen
-          \`\`\`
-          `cat src/user_module.v`
-          \`\`\`
-          EOF
-      - name: populate rtl cache
-        uses: actions/cache@v2
-        with:
-          path: src
-          key: ${{ runner.os }}-rtl-${{ hashFiles('src/user_module.v') }}
-      - name: commit generated rtl
-        run: |
-          git config --local user.name "tinybot"
-          git config --local user.email "bot@tinytapeout.com"
-          git add src/user_module.v src/user_module.ir src/user_module_opt.ir
-          git commit -m "src: generated user module [skip ci]" || true
-          git push origin main
+    - name: checkout repo
+      uses: actions/checkout@v2
+    - name: cache conda
+      uses: actions/cache@v2
+      env:
+        CACHE_NUMBER: 1
+      with:
+        path: ~/conda_pkgs_dir
+        key:
+          ${{ runner.os }}-conda-${{ env.CACHE_NUMBER }}-${{ hashFiles('environment.yml') }}
+    - name: setup miniconda
+      uses: conda-incubator/setup-miniconda@v2.1.1
+      with:
+        activate-environment: tinytapeout
+        channel-priority: strict
+        environment-file: environment.yml
+        use-only-tar-bz2: true
+    - name: update path
+      shell: bash -l {0}
+      run: |
+        echo $CONDA/envs/tinytapeout/bin >> $GITHUB_PATH
+    - name: run dslx test
+      run: |
+        cat << EOF >> $GITHUB_STEP_SUMMARY
+        # test
+        \`\`\`
+        `interpreter_main src/user_module.x 2>&1`
+        \`\`\`
+        EOF
+    - name: generate rtl
+      run: |
+        ir_converter_main --top=user_module src/user_module.x > src/user_module.ir
+        opt_main src/user_module.ir > src/user_module_opt.ir
+        codegen_main --module_name user_module --use_system_verilog=false --generator=combinational src/user_module_opt.ir > src/user_module.v
+    - name: add verilog to summary
+      run: |
+        cat << EOF >> $GITHUB_STEP_SUMMARY
+        # codegen
+        \`\`\`
+        `cat src/user_module.v`
+        \`\`\`
+        EOF
+    - name: populate rtl cache
+      uses: actions/cache@v2
+      with:
+        path: src
+        key: ${{ runner.os }}-rtl-${{ hashFiles('src/user_module.v') }}
   
   gds:
-    needs: xls
+    needs:
+    - xls
     env:
         OPENLANE_IMAGE_NAME:    efabless/openlane:2022.07.02_01.38.08
         OPENLANE_ROOT:  /home/runner/openlane
@@ -213,6 +207,26 @@ jobs:
         path: 'tinytapeout.gds.gltf'
         key: ${{ runner.os }}-viewer-${{ github.run_id }}
 
+  commit:
+    needs:
+    - gds
+    runs-on: ubuntu-latest
+    steps:
+    - name: checkout repo
+      uses: actions/checkout@v2
+    - name: restore rtl cache
+      uses: actions/cache@v2
+      with:
+        path: src
+        key: ${{ runner.os }}-rtl-${{ hashFiles('src/user_module.v') }}
+    - name: commit generated rtl
+       run: |
+         git config --local user.name "tinybot"
+         git config --local user.email "bot@tinytapeout.com"
+         git add src/user_module.v src/user_module.ir src/user_module_opt.ir
+         git commit -m "src: generated user module [skip ci]" || true
+         git push origin main
+    
   artifact:
     needs:
     - gds
